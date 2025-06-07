@@ -1,11 +1,13 @@
 package unicauca.composeservice.exceptions;
 
+import lombok.Getter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.web.reactive.function.client.WebClientRequestException;
 
 import java.net.URI;
 
+@Getter
 public class ServiceUnavailableException extends WebClientRequestException {
     private final String serviceName;
 
@@ -14,7 +16,4 @@ public class ServiceUnavailableException extends WebClientRequestException {
         this.serviceName = serviceName;
     }
 
-    public String getServiceName() {
-        return serviceName;
-    }
 }

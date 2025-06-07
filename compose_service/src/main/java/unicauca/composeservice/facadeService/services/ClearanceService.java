@@ -4,8 +4,10 @@ import lombok.AllArgsConstructor;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.reactive.function.client.WebClientRequestException;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
+import unicauca.composeservice.exceptions.ServiceUnavailableException;
 import unicauca.composeservice.facadeService.dtos.request.InfoStudentDTO;
 import unicauca.composeservice.facadeService.dtos.request.RequestClearanceDTO;
 import unicauca.composeservice.facadeService.dtos.response.ClearanceDTO;
@@ -29,38 +31,20 @@ public class ClearanceService implements IClearanceService {
         System.out.println("Starting the clearance request process...");
 
         try {
-            List<DebtResponseDTO> debtResponse = List.of();
-            List<LabResponseDTO> labResponse = List.of();
-            List<SportResponseDTO> sportResponse = List.of();
-            if(requestClearanceDTO.isDebtService())
-                debtResponse = webClient.post()
-                    .uri(urlDebtService)
-                    .bodyValue(requestClearanceDTO.getInfoStudent())
-                    .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<List<DebtResponseDTO>>() {})
-                    .onErrorResume(WebClientResponseException.NotFound.class, ex -> Mono.just(List.of()))
-                    .defaultIfEmpty(List.of())
-                    .block();
+            List<DebtResponseDTO> debtResponse = requestClearanceDTO.isDebtService()
+                    ? callService(urlDebtService, requestClearanceDTO.getInfoStudent(),
+                    new ParameterizedTypeReference<List<DebtResponseDTO>>() {}, "DebtService").block()
+                    : List.of();
 
-            if(requestClearanceDTO.isLabService())
-                labResponse = webClient.post()
-                    .uri(urlLabService)
-                    .bodyValue(requestClearanceDTO.getInfoStudent())
-                    .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<List<LabResponseDTO>>() {})
-                    .onErrorResume(WebClientResponseException.NotFound.class, ex -> Mono.just(List.of()))
-                    .defaultIfEmpty(List.of())
-                    .block();
+            List<LabResponseDTO> labResponse = requestClearanceDTO.isLabService()
+                    ? callService(urlLabService, requestClearanceDTO.getInfoStudent(),
+                    new ParameterizedTypeReference<List<LabResponseDTO>>() {}, "LabService").block()
+                    : List.of();
 
-            if(requestClearanceDTO.isSportService())
-                sportResponse = webClient.post()
-                    .uri(urlSportsService)
-                    .bodyValue(requestClearanceDTO.getInfoStudent())
-                    .retrieve()
-                    .bodyToMono(new ParameterizedTypeReference<List<SportResponseDTO>>() {})
-                    .onErrorResume(WebClientResponseException.NotFound.class, ex -> Mono.just(List.of()))
-                    .defaultIfEmpty(List.of())
-                    .block();
+            List<SportResponseDTO> sportResponse = requestClearanceDTO.isSportService()
+                    ? callService(urlSportsService, requestClearanceDTO.getInfoStudent(),
+                    new ParameterizedTypeReference<List<SportResponseDTO>>() {}, "SportsService").block()
+                    : List.of();
 
             int totalDebts = debtResponse.size() + labResponse.size() + sportResponse.size();
             String message = totalDebts > 0
@@ -75,19 +59,14 @@ public class ClearanceService implements IClearanceService {
                     .sportResponse(sportResponse)
                     .build();
 
+        } catch (ServiceUnavailableException e) {
+            System.out.println("Servicio no disponible: " + e.getServiceName() + " - " + e.getMessage());
+            throw e;
         } catch (Exception e) {
             System.out.println("An error occurred while processing the clearance request: " + e.getMessage());
             throw e;
-//            return ClearanceDTO.builder()
-  //                  .studentCode(requestClearanceDTO.getInfoStudent().getStudentCode())
-    //                .message("An error occurred while processing the request.")
-      //              .debtResponse(List.of())
-        //            .labResponse(List.of())
-          //          .sportResponse(List.of())
-            //        .build();
         }
     }
-
     @Override
     public Mono<ClearanceDTO> requestClearance_async(RequestClearanceDTO requestClearanceDTO) {
         System.out.println("Starting the ASYNC clearance request process...");
@@ -135,12 +114,22 @@ public class ClearanceService implements IClearanceService {
                 .bodyValue(student)
                 .retrieve()
                 .bodyToMono(typeRef)
+                .defaultIfEmpty(List.of())
                 .onErrorResume(WebClientResponseException.NotFound.class, ex -> {
                     System.out.println("[" + serviceName + "] Not Found: " + ex.getMessage());
                     return Mono.just(List.of());
                 })
+                .onErrorResume(WebClientRequestException.class, ex -> {
+                    ServiceUnavailableException serviceException = new ServiceUnavailableException(
+                            serviceName,
+                            ex,
+                            ex.getMethod(),
+                            ex.getUri()
+                    );
+                    return Mono.error(serviceException);
+                })
                 .onErrorResume(e -> {
-                    System.out.println("[" + serviceName + "] Error: " + e.toString());
+                    System.out.println("[" + serviceName + "] Error inesperado: " + e.toString());
                     return Mono.just(List.of());
                 });
     }
