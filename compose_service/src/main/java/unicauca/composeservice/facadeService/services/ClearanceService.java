@@ -22,9 +22,9 @@ import java.util.List;
 public class ClearanceService implements IClearanceService {
 
     private final WebClient webClient;
-    private final String urlDebtService = "http://localhost:29001/finance/pending";
-    private final String urlLabService = "http://localhost:29000/lab/pending";
-    private final String urlSportsService = "http://localhost:29002/sports/pending";
+    private final String urlDebtService = "http://debt-service:29001/finance/pending";
+    private final String urlLabService = "http://lab-service:29000/lab/pending";
+    private final String urlSportsService = "http://sports-service:29002/sports/pending";
 
     @Override
     public ClearanceDTO requestClearance(RequestClearanceDTO requestClearanceDTO) {
