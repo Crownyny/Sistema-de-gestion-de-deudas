@@ -1,0 +1,12 @@
+# 🎓 Paz y Salvo Distribuido - Universidad del Cauca
+
+Este proyecto implementa un sistema distribuido para validar si un estudiante está **a paz y salvo** con las áreas de:
+
+- 💻 Laboratorios
+- 💰 Financiera
+- 🏀 Deportes
+
+Cada área tiene su propia **aplicación servidora** que maneja consultas y eliminación de pendientes. Se sigue una arquitectura en capas con separación clara de responsabilidades, uso de **interfaces**, **DTOs de entrada/salida**, e **inyección de dependencias**.
+
+---
+

@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  lab-service:
+    build:
+      context: ./lab_service
+      dockerfile: Dockerfile
+    ports:
+      - "29000:29000"
+    networks:
+      - university-network
+    restart: unless-stopped
+
+  debt-service:
+    build:
+      context: ./debt_service
+      dockerfile: Dockerfile
+    ports:
+      - "29001:29001"
+    networks:
+      - university-network
+    restart: unless-stopped
+
+  sports-service:
+    build:
+      context: ./sports_service
+      dockerfile: Dockerfile
+    ports:
+      - "29002:29002"
+    networks:
+      - university-network
+    restart: unless-stopped
+
+networks:
+  university-network:
+    driver: bridge
