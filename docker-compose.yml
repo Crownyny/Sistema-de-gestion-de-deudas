@@ -30,7 +30,17 @@ services:
     networks:
       - university-network
     restart: unless-stopped
+  compose-service:
+    build: ./compose_service
+    ports:
+      - "8080:8080"
+    networks:
+      - university-network
+    volumes:
+      - maven-repo:/root/.m2
 
+volumes:
+  maven-repo:
 networks:
   university-network:
     driver: bridge
