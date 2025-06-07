@@ -1,6 +1,7 @@
 package unicauca.composeservice.facadeService.services;
 
 import lombok.AllArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -14,6 +15,9 @@ import unicauca.composeservice.facadeService.dtos.response.ClearanceDTO;
 import unicauca.composeservice.facadeService.dtos.response.DebtResponseDTO;
 import unicauca.composeservice.facadeService.dtos.response.LabResponseDTO;
 import unicauca.composeservice.facadeService.dtos.response.SportResponseDTO;
+import unicauca.composeservice.facadeService.events.ClearanceEvent;
+import unicauca.composeservice.facadeService.events.EventType;
+import unicauca.composeservice.facadeService.events.ServiceType;
 
 import java.util.List;
 
@@ -22,6 +26,7 @@ import java.util.List;
 public class ClearanceService implements IClearanceService {
 
     private final WebClient webClient;
+    private final ApplicationEventPublisher eventPublisher;
     private final String urlDebtService = "http://debt-service:29001/finance/pending";
     private final String urlLabService = "http://lab-service:29000/lab/pending";
     private final String urlSportsService = "http://sports-service:29002/sports/pending";
@@ -29,7 +34,14 @@ public class ClearanceService implements IClearanceService {
     @Override
     public ClearanceDTO requestClearance(RequestClearanceDTO requestClearanceDTO) {
         System.out.println("Starting the clearance request process...");
-
+        eventPublisher.publishEvent(new ClearanceEvent(
+                EventType.REQUEST,
+                ServiceType.ALL,
+                ClearanceDTO.builder()
+                    .studentCode(requestClearanceDTO.getInfoStudent().getStudentCode())
+                    .message("Solicitud de paz y salvo iniciada para estudiante: " + requestClearanceDTO.getInfoStudent().getStudentCode())
+                    .build()
+        ));
         try {
             List<DebtResponseDTO> debtResponse = requestClearanceDTO.isDebtService()
                     ? callService(urlDebtService, requestClearanceDTO.getInfoStudent(),
@@ -70,6 +82,15 @@ public class ClearanceService implements IClearanceService {
     @Override
     public Mono<ClearanceDTO> requestClearance_async(RequestClearanceDTO requestClearanceDTO) {
         System.out.println("Starting the ASYNC clearance request process...");
+
+        eventPublisher.publishEvent(new ClearanceEvent(
+                EventType.REQUEST,
+                ServiceType.ALL,
+                ClearanceDTO.builder()
+                        .studentCode(requestClearanceDTO.getInfoStudent().getStudentCode())
+                        .message("Solicitud de paz y salvo iniciada para estudiante: " + requestClearanceDTO.getInfoStudent().getStudentCode())
+                        .build()
+        ));
 
         Mono<List<DebtResponseDTO>> debtMono = requestClearanceDTO.isDebtService()
                 ? callService(urlDebtService, requestClearanceDTO.getInfoStudent(), new ParameterizedTypeReference<>() {}, "DebtService")
@@ -115,6 +136,37 @@ public class ClearanceService implements IClearanceService {
                 .retrieve()
                 .bodyToMono(typeRef)
                 .defaultIfEmpty(List.of())
+                .doOnNext(response -> {
+                    // Determinar el tipo de servicio para el evento
+                    ServiceType serviceType = switch (serviceName) {
+                        case "DebtService" -> ServiceType.DEBT;
+                        case "LabService" -> ServiceType.LAB;
+                        case "SportsService" -> ServiceType.SPORTS;
+                        default -> ServiceType.ALL;
+                    };
+
+                    // Publicar evento según si hay deudas o no
+                    if (response.isEmpty()) {
+                        eventPublisher.publishEvent(new ClearanceEvent(
+                                EventType.DEBT_NOT_FOUND,
+                                serviceType,
+                                ClearanceDTO.builder()
+                                        .studentCode(student.getStudentCode())
+                                        .message("No tiene deudas el estudiante: " + student.getStudentCode())
+                                        .build()
+                        ));
+                    } else {
+                        eventPublisher.publishEvent(new ClearanceEvent(
+                                EventType.DEBT_FOUND,
+                                serviceType,
+                                ClearanceDTO.fromGeneric(
+                                        "El estudiante tiene " + response.size() + " deudas pendientes en " + serviceName,
+                                        student.getStudentCode(),
+                                        response.stream().toList()
+                                )
+                        ));
+                    }
+                })
                 .onErrorResume(WebClientResponseException.NotFound.class, ex -> {
                     System.out.println("[" + serviceName + "] Not Found: " + ex.getMessage());
                     return Mono.just(List.of());
@@ -129,9 +181,17 @@ public class ClearanceService implements IClearanceService {
                     return Mono.error(serviceException);
                 })
                 .onErrorResume(e -> {
-                    System.out.println("[" + serviceName + "] Error inesperado: " + e.toString());
                     return Mono.just(List.of());
                 });
     }
 
+    // Método auxiliar para obtener el ServiceType a partir del nombre del servicio
+    private ServiceType getServiceTypeFromName(String serviceName) {
+        return switch (serviceName) {
+            case "DebtService" -> ServiceType.DEBT;
+            case "LabService" -> ServiceType.LAB;
+            case "SportsService" -> ServiceType.SPORTS;
+            default -> ServiceType.ALL;
+        };
+    }
 }
