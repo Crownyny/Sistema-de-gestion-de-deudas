@@ -95,11 +95,7 @@ func (r *sportRepositoryImpl) GetUnreturnedItems(sportInputDTO dto.SportInputDTO
         if item.StudentCode == sportInputDTO.StudentCode {
             found = true
             if item.RealReturnDate == "" {
-                result = append(result, dto.SportOutputDTO{
-                    Item:                item.Item,
-                    LoanDate:            item.LoanDate,
-                    EstimatedReturnDate: item.EstimatedReturnDate,
-                })
+                result = append(result, item)
             }
         }
     }
