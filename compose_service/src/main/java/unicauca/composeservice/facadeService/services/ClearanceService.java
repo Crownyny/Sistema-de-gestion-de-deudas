@@ -10,7 +10,6 @@ import org.springframework.web.reactive.function.client.WebClientResponseExcepti
 import reactor.core.publisher.Mono;
 import unicauca.composeservice.exceptions.ServiceUnavailableException;
 import unicauca.composeservice.facadeService.dtos.request.InfoStudentDTO;
-import unicauca.composeservice.facadeService.dtos.request.RequestClearanceDTO;
 import unicauca.composeservice.facadeService.dtos.response.ClearanceDTO;
 import unicauca.composeservice.facadeService.dtos.response.DebtResponseDTO;
 import unicauca.composeservice.facadeService.dtos.response.LabResponseDTO;
@@ -32,31 +31,31 @@ public class ClearanceService implements IClearanceService {
     private final String urlSportsService = "http://sports-service:29002/sports/pending";
 
     @Override
-    public ClearanceDTO requestClearance(RequestClearanceDTO requestClearanceDTO) {
+    public ClearanceDTO requestClearance(String idStudent) {
         System.out.println("Starting the clearance request process...");
         eventPublisher.publishEvent(new ClearanceEvent(
                 EventType.REQUEST,
                 ServiceType.ALL,
                 ClearanceDTO.builder()
-                    .studentCode(requestClearanceDTO.getInfoStudent().getStudentCode())
-                    .message("Solicitud de paz y salvo iniciada para estudiante: " + requestClearanceDTO.getInfoStudent().getStudentCode())
+                    .studentCode(idStudent)
+                    .message("Solicitud de paz y salvo iniciada para estudiante: " + idStudent)
                     .build()
         ));
         try {
-            List<DebtResponseDTO> debtResponse = requestClearanceDTO.isDebtService()
-                    ? callService(urlDebtService, requestClearanceDTO.getInfoStudent(),
-                    new ParameterizedTypeReference<List<DebtResponseDTO>>() {}, "DebtService").block()
-                    : List.of();
+            List<DebtResponseDTO> debtResponse =
+                    callService(urlDebtService, idStudent,
+                    new ParameterizedTypeReference<List<DebtResponseDTO>>() {}, "DebtService").block();
 
-            List<LabResponseDTO> labResponse = requestClearanceDTO.isLabService()
-                    ? callService(urlLabService, requestClearanceDTO.getInfoStudent(),
-                    new ParameterizedTypeReference<List<LabResponseDTO>>() {}, "LabService").block()
-                    : List.of();
+            List<LabResponseDTO> labResponse =
+                    callService(urlLabService, idStudent,
+                    new ParameterizedTypeReference<List<LabResponseDTO>>() {}, "LabService").block();
 
-            List<SportResponseDTO> sportResponse = requestClearanceDTO.isSportService()
-                    ? callService(urlSportsService, requestClearanceDTO.getInfoStudent(),
-                    new ParameterizedTypeReference<List<SportResponseDTO>>() {}, "SportsService").block()
-                    : List.of();
+            List<SportResponseDTO> sportResponse =
+                    callService(urlSportsService, idStudent,
+                    new ParameterizedTypeReference<List<SportResponseDTO>>() {}, "SportsService").block();
+
+            if(debtResponse==null || labResponse==null || sportResponse==null)
+                throw new RuntimeException("One or more service responses are null. Please check the service availability.");
 
             int totalDebts = debtResponse.size() + labResponse.size() + sportResponse.size();
             String message = totalDebts > 0
@@ -64,7 +63,7 @@ public class ClearanceService implements IClearanceService {
                     : "The student has no pending debts in the system.";
 
             return ClearanceDTO.builder()
-                    .studentCode(requestClearanceDTO.getInfoStudent().getStudentCode())
+                    .studentCode(idStudent)
                     .message(message)
                     .debtResponse(debtResponse)
                     .labResponse(labResponse)
@@ -80,29 +79,29 @@ public class ClearanceService implements IClearanceService {
         }
     }
     @Override
-    public Mono<ClearanceDTO> requestClearance_async(RequestClearanceDTO requestClearanceDTO) {
+    public Mono<ClearanceDTO> requestClearance_async(String idStudent) {
         System.out.println("Starting the ASYNC clearance request process...");
 
         eventPublisher.publishEvent(new ClearanceEvent(
                 EventType.REQUEST,
                 ServiceType.ALL,
                 ClearanceDTO.builder()
-                        .studentCode(requestClearanceDTO.getInfoStudent().getStudentCode())
-                        .message("Solicitud de paz y salvo iniciada para estudiante: " + requestClearanceDTO.getInfoStudent().getStudentCode())
+                        .studentCode(idStudent)
+                        .message("Solicitud de paz y salvo iniciada para estudiante: " + idStudent)
                         .build()
         ));
 
-        Mono<List<DebtResponseDTO>> debtMono = requestClearanceDTO.isDebtService()
-                ? callService(urlDebtService, requestClearanceDTO.getInfoStudent(), new ParameterizedTypeReference<>() {}, "DebtService")
-                : Mono.just(List.of());
+        Mono<List<DebtResponseDTO>> debtMono =
+                callService(urlDebtService, idStudent, new ParameterizedTypeReference<>() {}, "DebtService");
+                
 
-        Mono<List<LabResponseDTO>> labMono = requestClearanceDTO.isLabService()
-                ? callService(urlLabService, requestClearanceDTO.getInfoStudent(), new ParameterizedTypeReference<>() {}, "LabService")
-                : Mono.just(List.of());
+        Mono<List<LabResponseDTO>> labMono =
+                callService(urlLabService, idStudent, new ParameterizedTypeReference<>() {}, "LabService");
+                
 
-        Mono<List<SportResponseDTO>> sportMono = requestClearanceDTO.isSportService()
-                ? callService(urlSportsService, requestClearanceDTO.getInfoStudent(), new ParameterizedTypeReference<>() {}, "SportsService")
-                : Mono.just(List.of());
+        Mono<List<SportResponseDTO>> sportMono =
+                callService(urlSportsService, idStudent, new ParameterizedTypeReference<>() {}, "SportsService");
+                
 
         return Mono.zip(debtMono, labMono, sportMono)
                 .map(tuple -> {
@@ -116,7 +115,7 @@ public class ClearanceService implements IClearanceService {
                             : "The student has no pending debts in the system.";
 
                     return ClearanceDTO.builder()
-                            .studentCode(requestClearanceDTO.getInfoStudent().getStudentCode())
+                            .studentCode(idStudent)
                             .message(message)
                             .debtResponse(debtResponse)
                             .labResponse(labResponse)
@@ -129,10 +128,12 @@ public class ClearanceService implements IClearanceService {
                 });
     }
 
-    private <T> Mono<List<T>> callService(String url, InfoStudentDTO student, ParameterizedTypeReference<List<T>> typeRef, String serviceName) {
-        return webClient.post()
+    private <T> Mono<List<T>> callService(String url, String student, ParameterizedTypeReference<List<T>> typeRef, String serviceName) {
+
+        return
+                webClient.post()
                 .uri(url)
-                .bodyValue(student)
+                .bodyValue(new InfoStudentDTO(student))
                 .retrieve()
                 .bodyToMono(typeRef)
                 .defaultIfEmpty(List.of())
@@ -151,8 +152,8 @@ public class ClearanceService implements IClearanceService {
                                 EventType.DEBT_NOT_FOUND,
                                 serviceType,
                                 ClearanceDTO.builder()
-                                        .studentCode(student.getStudentCode())
-                                        .message("No tiene deudas el estudiante: " + student.getStudentCode())
+                                        .studentCode(student)
+                                        .message("No tiene deudas el estudiante: " + student)
                                         .build()
                         ));
                     } else {
@@ -161,7 +162,7 @@ public class ClearanceService implements IClearanceService {
                                 serviceType,
                                 ClearanceDTO.fromGeneric(
                                         "El estudiante tiene " + response.size() + " deudas pendientes en " + serviceName,
-                                        student.getStudentCode(),
+                                        student,
                                         response.stream().toList()
                                 )
                         ));
@@ -180,18 +181,7 @@ public class ClearanceService implements IClearanceService {
                     );
                     return Mono.error(serviceException);
                 })
-                .onErrorResume(e -> {
-                    return Mono.just(List.of());
-                });
+                .onErrorResume(e -> Mono.just(List.of()));
     }
 
-    // Método auxiliar para obtener el ServiceType a partir del nombre del servicio
-    private ServiceType getServiceTypeFromName(String serviceName) {
-        return switch (serviceName) {
-            case "DebtService" -> ServiceType.DEBT;
-            case "LabService" -> ServiceType.LAB;
-            case "SportsService" -> ServiceType.SPORTS;
-            default -> ServiceType.ALL;
-        };
-    }
 }

@@ -3,7 +3,6 @@ package unicauca.composeservice.controllers;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
-import unicauca.composeservice.facadeService.dtos.request.RequestClearanceDTO;
 import unicauca.composeservice.facadeService.dtos.response.ClearanceDTO;
 import unicauca.composeservice.facadeService.services.IClearanceService;
 
@@ -14,10 +13,10 @@ public class ClearanceController {
 
     private final IClearanceService clearanceService;
 
-    @PostMapping
+    @PostMapping("/{idStudent}")
     public Mono<ClearanceDTO> createClearance(
-        @RequestBody
-        RequestClearanceDTO clearanceDTO,
+        @PathVariable
+        String idStudent,
         @RequestParam(value = "async", required = false, defaultValue = "false")
         boolean isAsync,
         @RequestParam(value = "simluate_fail", required = false, defaultValue = "false")
@@ -28,9 +27,9 @@ public class ClearanceController {
             Thread.sleep(10000);
 
         if (isAsync) {
-            return clearanceService.requestClearance_async(clearanceDTO);
+            return clearanceService.requestClearance_async(idStudent);
         } else {
-            return Mono.just(clearanceService.requestClearance(clearanceDTO));
+            return Mono.just(clearanceService.requestClearance(idStudent));
         }
     }
 

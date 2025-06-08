@@ -1,7 +1,6 @@
 package unicauca.composeservice.facadeService.services;
 
 import reactor.core.publisher.Mono;
-import unicauca.composeservice.facadeService.dtos.request.RequestClearanceDTO;
 import unicauca.composeservice.facadeService.dtos.response.ClearanceDTO;
 
 public interface IClearanceService {
@@ -9,16 +8,16 @@ public interface IClearanceService {
     /**
      * Requests clearance synchronously.
      *
-     * @param requestClearanceDTO the request data transfer object containing clearance request details
+     * @param idStudent id of the student for whom clearance is requested
      * @return a ClearanceDTO containing the response details
      */
-    ClearanceDTO requestClearance(RequestClearanceDTO requestClearanceDTO);
+    ClearanceDTO requestClearance(String idStudent);
 
     /**
      * Requests clearance asynchronously.
      *
-     * @param requestClearanceDTO the request data transfer object containing clearance request details
+     * @param idStudent id of the student for whom clearance is requested
      * @return a ClearanceDTO containing the response details
      */
-    Mono<ClearanceDTO> requestClearance_async(RequestClearanceDTO requestClearanceDTO);
+    Mono<ClearanceDTO> requestClearance_async(String idStudent);
 }
