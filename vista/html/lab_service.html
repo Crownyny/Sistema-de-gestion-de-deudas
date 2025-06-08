@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Servicio del laboratorio</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="../css/styleBasic.css">
+    <link rel="stylesheet" href="../css/styleSportService.css">
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg navbar-light heder-basic efecto-circular ">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <img src="../img/logo.png" alt="Logo" width="75" height="110" class="d-inline-block align-text-top">
+                    </a>
+                <div class="ms-auto">
+                    <span class="navbar-text">
+                        
+                    </span>
+                </div>
+            </div>
+        </nav>
+        <div class="divider"></div>
+    </header>
+    <div class="contain-white d-flex flex-column ">
+        
+        <div>
+            <h1>¡Bienvenido al servicio del laboratorio !</h1>
+        </div>       
+        <h2 class="mt-4">
+            Notification general
+        </h2>
+        <div id="notification" class="notification">
+            
+        </div>
+        <h2>Notificaciones exlcusiva del laboratorio: </h2>
+        <div id="contentResult" >
+            <p class="m-4 beforeResult" id="result">
+                No hay notificaciones hasta el momento
+            </p>
+        </div>
+        <button class="btn-connect" id="btnEliminarDeudas" onclick="conect()">conectar</button> 
+        <P id="messageConcect"></P>
+    </div>
+   
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+    <script src="../js/functionslabServ.js"></script>
+</body>
+</html>

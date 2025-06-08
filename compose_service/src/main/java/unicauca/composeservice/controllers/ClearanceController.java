@@ -9,6 +9,7 @@ import unicauca.composeservice.facadeService.services.IClearanceService;
 @RestController
 @RequestMapping("/api/clearance")
 @AllArgsConstructor
+@CrossOrigin(origins = "*") // <-- prueba con esto
 public class ClearanceController {
 
     private final IClearanceService clearanceService;

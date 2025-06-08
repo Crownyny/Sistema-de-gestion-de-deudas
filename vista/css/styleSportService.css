@@ -1,0 +1,40 @@
+.notification{
+    height: 200px;
+    overflow: auto;
+}
+.btn-connect{
+    background-color: #060653;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    margin: 10px;
+    height:auto;
+}
+.btn-connect:hover{
+    background-color: #040420;
+}
+.btn-disconect{
+    background-color: #531206;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    margin: 10px;
+    height: clamp(1.5rem, 5vw, 1.5rem);
+}
+#contentResult{
+    height: 300px;
+}
+.beforeResult{
+    color: #7c79a8;
+    text-align: center;
+    height: 90%;
+    justify-content: center;
+    display: flex;
+    align-items: center;
+}
