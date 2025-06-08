@@ -84,6 +84,13 @@ func NewSportRepository() SportRepository {
                 EstimatedReturnDate: "2025-05-10",
                 RealReturnDate:      "",
             },
+            {
+                StudentCode:         "104622022333",
+                Item:                "Balon de futbol",
+                LoanDate:            "2025-05-06",
+                EstimatedReturnDate: "2025-05-11",
+                RealReturnDate:      "",
+            },
         },
     }
 }

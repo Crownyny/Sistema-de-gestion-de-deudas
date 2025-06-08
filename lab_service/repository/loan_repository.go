@@ -30,6 +30,15 @@ func NewLoanRepository() LoanRepository {
                 Equipment:           "Generador de señales",
             },
             {
+                StudentCode:         "104622022333",
+                LoanDate:            "2025-02-15",
+                EstimatedReturnDate: "2025-02-20",
+                RealReturnDate:      "",
+                Status:              "vencido",
+                Equipment:           "Arduino",
+            },
+
+            {
                 StudentCode:         "104622033456",
                 LoanDate:            "2025-06-10",
                 EstimatedReturnDate: "2025-06-15",

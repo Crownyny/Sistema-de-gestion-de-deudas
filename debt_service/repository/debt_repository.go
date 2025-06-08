@@ -29,7 +29,7 @@ func NewDebtRepository() DebtRepository {
                 Status:      "pagada",
             },
             {
-                StudentCode: "104789567890",
+                StudentCode: "104622022333",
                 Amount:      35000,
                 Reason:      "Daño a equipo de laboratorio",
                 DebtDate:    "2024-03-15",
@@ -53,7 +53,7 @@ func NewDebtRepository() DebtRepository {
                 Status:      "pendiente",
             },
             {
-                StudentCode: "104987123450",
+                StudentCode: "104621019870",
                 Amount:      25000,
                 Reason:      "Cargo por certificado académico",
                 DebtDate:    "2024-02-10",
@@ -74,6 +74,14 @@ func NewDebtRepository() DebtRepository {
                 Reason:      "Reposición de carné estudiantil",
                 DebtDate:    "2024-05-28",
                 DueDate:     "2024-06-28",
+                Status:      "pendiente",
+            },
+            {
+                StudentCode: "104622022345",
+                Amount:      8000,
+                Reason:      "Reposición de carné estudiantil",
+                DebtDate:    "2025-05-28",
+                DueDate:     "2025-06-28",
                 Status:      "pendiente",
             },
         },
