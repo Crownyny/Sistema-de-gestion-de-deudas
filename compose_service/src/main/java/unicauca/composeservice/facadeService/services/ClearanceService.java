@@ -129,7 +129,12 @@ public class ClearanceService implements IClearanceService {
     }
 
     private <T> Mono<List<T>> callService(String url, String student, ParameterizedTypeReference<List<T>> typeRef, String serviceName) {
-
+        ServiceType serviceType = switch (serviceName) {
+            case "DebtService" -> ServiceType.DEBT;
+            case "LabService" -> ServiceType.LAB;
+            case "SportsService" -> ServiceType.SPORTS;
+            default -> ServiceType.ALL;
+        };
         return
                 webClient.post()
                 .uri(url)
@@ -138,13 +143,6 @@ public class ClearanceService implements IClearanceService {
                 .bodyToMono(typeRef)
                 .defaultIfEmpty(List.of())
                 .doOnNext(response -> {
-                    // Determinar el tipo de servicio para el evento
-                    ServiceType serviceType = switch (serviceName) {
-                        case "DebtService" -> ServiceType.DEBT;
-                        case "LabService" -> ServiceType.LAB;
-                        case "SportsService" -> ServiceType.SPORTS;
-                        default -> ServiceType.ALL;
-                    };
 
                     // Publicar evento según si hay deudas o no
                     if (response.isEmpty()) {
@@ -170,6 +168,14 @@ public class ClearanceService implements IClearanceService {
                 })
                 .onErrorResume(WebClientResponseException.NotFound.class, ex -> {
                     System.out.println("[" + serviceName + "] Not Found: " + ex.getMessage());
+                    eventPublisher.publishEvent(new ClearanceEvent(
+                            EventType.DEBT_NOT_FOUND,
+                            serviceType,
+                            ClearanceDTO.builder()
+                                    .studentCode(student)
+                                    .message("No tiene deudas el estudiante: " + student)
+                                    .build()
+                    ));
                     return Mono.just(List.of());
                 })
                 .onErrorResume(WebClientRequestException.class, ex -> {
