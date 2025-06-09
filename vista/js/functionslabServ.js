@@ -37,6 +37,7 @@ function receiveMessage(message) {
     <div class="p-3 mb-3">
       <p><strong>Codigo estudiante:</strong> ${dto.studentCode}</p>
       <p> ${dto.message}</p>
+    </div>
   `;
 
   if (laboratorio && laboratorio.length > 0) {
@@ -69,11 +70,9 @@ function receiveMessage(message) {
     });
     html += `  </tbody>
         </table>
-    </div>`;
+    `;
   }
-  else{
-    html += `<p>No hay deudas de laboratorios registrados para el estudiante consultado.</p>`;
-  }
+  
 
   const container = document.getElementById("contentResult");
   container.innerHTML = ""; 

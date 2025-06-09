@@ -6,7 +6,7 @@ body{
     color: black;
     min-height: 70vh;
     height: auto;
-    width: clamp(70vh, 80vw, 90vh);
+    width: clamp(80vh, 80vw, 100vh);
     padding: clamp(20px, 5vw, 50px);
     border-radius: 30px;
     margin-top: 5vh;
@@ -18,7 +18,31 @@ body{
 .heder-basic{
     background-color: #240d63;
 }
-
+.btn-connect{
+    background-color: #060653;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    margin: 10px;
+    height:auto;
+}
+.btn-connect:hover{
+    background-color: #040420;
+}
+.btn-disconect{
+    background-color: #531206;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+    margin: 10px;
+    height: clamp(1.5rem, 5vw, 1.5rem);
+}
 table, th, td {
     border: 1px solid rgba(31, 16, 100, 0);
     border-collapse: collapse; /* Makes borders collapse into a single line */

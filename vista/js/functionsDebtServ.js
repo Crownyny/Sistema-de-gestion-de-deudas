@@ -42,6 +42,7 @@ function receiveMessageNotify(message) {
     <div class="p-3 mb-3">
       <p><strong>Código estudiante:</strong> ${dto.studentCode}</p>
       <p>${dto.message}</p>
+    </div>
   `;
 
   // Muestra las deudas generales
@@ -77,7 +78,5 @@ function receiveMessageNotify(message) {
     `;
   }
 
-  // Puedes hacer lo mismo para labResponse y sportResponse si quieres mostrar más
-  html += `</div>`;
   container.innerHTML = html;
 }

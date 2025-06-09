@@ -37,6 +37,7 @@ function receiveMessage(message) {
     <div class="p-3 mb-3">
       <p><strong>Codigo estudiante:</strong> ${dto.studentCode}</p>
       <p> ${dto.message}</p>
+    </div>
   `;
 
   if (deportes && deportes.length > 0) {
@@ -65,8 +66,6 @@ function receiveMessage(message) {
     html += `  </tbody>
         </table>`;
   }
-
-  html += `</div>`;
 
   const container = document.getElementById("contentResult");
   container.innerHTML = ""; 
