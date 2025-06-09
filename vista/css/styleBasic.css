@@ -6,7 +6,7 @@ body{
     color: black;
     min-height: 70vh;
     height: auto;
-    width: clamp(80vh, 80vw, 100vh);
+    width: clamp(40vh, 80vw, 100vh);
     padding: clamp(20px, 5vw, 50px);
     border-radius: 30px;
     margin-top: 5vh;
@@ -77,10 +77,12 @@ th {
     width: 250%;
     height: 300%;
 }
-
+.navbar-text{
+    color: white;
+}
 .efecto-circular:hover .navbar-text,
 .efecto-circular.active .navbar-text {
-    color: white;
+    color: rgb(241, 233, 233);
     transition: color 0.3s ease-in-out;
 }
 

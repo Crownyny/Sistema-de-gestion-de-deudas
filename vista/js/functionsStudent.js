@@ -1,5 +1,5 @@
 let next_fail = false;
-
+let cont = 0; 
 async function consultar(async_v=false) {
   console.log(`Consultando paz y salvo de manera ${async_v?"asincronica":"sincronica"} ...`)
   const id = document.getElementById('studentCode').value;
@@ -104,7 +104,7 @@ function printValue(data) {
     resultContainer.innerHTML += tableHTML;
   }else {
     const noDebts = document.createElement("p");
-    noDebts.textContent = "No tiene deudas financieras.";
+    cont++;
     resultContainer.appendChild(noDebts);
   }
   if (data.labResponse && data.labResponse.length > 0) {
@@ -145,7 +145,7 @@ function printValue(data) {
   }else
   {
     const noDebts = document.createElement("p");
-    noDebts.textContent = "No tiene deudas de laboratorios.";
+    cont++;
     resultContainer.appendChild(noDebts);
   }
   
@@ -188,8 +188,13 @@ function printValue(data) {
   }else
   {
     const noDebts = document.createElement("p");
-    noDebts.textContent = "No tiene deudas de deportes.";
+    cont++;
     resultContainer.appendChild(noDebts);
   }
-
+  if (cont === 3) {
+    const noDebts = document.createElement("p");
+    noDebts.textContent = "El estudiante esta a paz y salvo.";
+    resultContainer.appendChild(noDebts);
+  }
+  cont=0;
 }
