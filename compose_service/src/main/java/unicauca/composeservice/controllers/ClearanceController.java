@@ -24,8 +24,10 @@ public class ClearanceController {
         boolean simulateFail
     ) throws InterruptedException {
 
-        if(simulateFail)
+        if(simulateFail){
             Thread.sleep(10000);
+            return Mono.error(new RuntimeException("Simulated failure"));
+        }
 
         if (isAsync) {
             return clearanceService.requestClearance_async(idStudent);

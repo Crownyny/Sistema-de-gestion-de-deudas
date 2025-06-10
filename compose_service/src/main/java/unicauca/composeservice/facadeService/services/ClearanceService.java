@@ -124,7 +124,7 @@ public class ClearanceService implements IClearanceService {
                 })
                 .onErrorResume(e -> {
                     System.out.println("An error occurred in ASYNC processing: " + e.toString());
-                    return Mono.empty();
+                    return Mono.error(e);
                 });
     }
 
@@ -179,15 +179,13 @@ public class ClearanceService implements IClearanceService {
                     return Mono.just(List.of());
                 })
                 .onErrorResume(WebClientRequestException.class, ex -> {
-                    ServiceUnavailableException serviceException = new ServiceUnavailableException(
+                    throw new ServiceUnavailableException(
                             serviceName,
                             ex,
                             ex.getMethod(),
                             ex.getUri()
                     );
-                    return Mono.error(serviceException);
-                })
-                .onErrorResume(e -> Mono.just(List.of()));
+                });
     }
 
 }
